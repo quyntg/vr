@@ -66,12 +66,12 @@
                 <audio id="audio6" src="audio/scene6.wav" preload="auto" playsinline></audio>
                 <audio id="audio7" src="audio/scene7.wav" preload="auto" playsinline></audio>
                 <img id="arrow" src="icons/arrow.png">
-                <img id="up-arrow" src="icons/up-arrow.png">
+                <img id="upload" src="icons/upload.png">
                 <img id="info" src="icons/info.png">
             </a-assets>
             <!-- Fade layer -->
             <!-- Camera rig -->
-            <a-entity id="rig" rotation="0 -90 0" auto-rotate>
+            <a-entity id="rig" rotation="0 90 0" auto-rotate>
                 <a-camera id="camera" look-controls wasd-controls="enabled:false">
                     <a-sphere id="fade" radius="1.5" color="#000" material="opacity:0; transparent:true; side: back"></a-sphere>
                     <!-- <a-entity id="hotspotFallback" visible="false" position="0 0 -1.5">
@@ -125,50 +125,57 @@
                 1: {
                     pano: '#tuong',
                     hotspots: [
-                        { x: 4, y: 1.2, z: 0.3, rot: {x: 75, y: 90, z: 0}, to: 2, type: 'up-arrow', src: '#up-arrow'},
-                        { x: 4, y: 0.9, z: 1.5, rot: {x: 75, y: 90, z: 5}, to: 4, type: 'up-arrow', src: '#up-arrow'}
-                    ]
+                        { x: 4, y: 1.2, z: 0.3, rot: {x: 75, y: 90, z: 0}, to: 2, type: 'upload', src: '#upload'},
+                        { x: 4, y: 0.9, z: 1.5, rot: {x: 75, y: 90, z: 5}, to: 4, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: 90, z: 0 }
                 },
                 2: {
                     pano: '#cong',
                     hotspots: [
-                        { x: -4, y: 1, z: 0.8, rot: {x: 50, y: -90, z: -10}, to: 3, type: 'up-arrow', src: '#up-arrow'},
-                        { x: 1.8, y: 1.3, z: -6, rot: {x: -27, y: 29, z: 46}, to: 1, type: 'up-arrow', src: '#up-arrow'}
-                    ]
+                        { x: -4, y: 1, z: 0.8, rot: {x: 50, y: -90, z: -10}, to: 3, type: 'upload', src: '#upload'},
+                        { x: 3.4, y: 0.8, z: -6, rot: {x: -7.5, y: 26, z: 49}, to: 1, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: 90, z: 0 }
                 },
                 3: { 
                     pano: '#toan',
                     hotspots: [
-                        { x: -1.8, y: -0.1, z: -7, rot: {x: 60, y: -170, z: 5}, to: 4, type: 'up-arrow', src: '#up-arrow'},
-                        { x: 1.7, y: 1.2, z: -6, rot: {x: 60, y: -170, z: 5}, to: 1, type: 'up-arrow', src: '#up-arrow'},
-                        { x: -6.3, y: -1.4, z: 0.5, rot: {x: 62, y: -95, z: 5}, to: 7, type: 'up-arrow', src: '#up-arrow'}
-                    ] 
+                        { x: -1.8, y: -0.1, z: -7, rot: {x: 60, y: -170, z: 5}, to: 4, type: 'upload', src: '#upload'},
+                        { x: 1.7, y: 1.2, z: -6, rot: {x: 60, y: -170, z: 5}, to: 1, type: 'upload', src: '#upload'},
+                        { x: -6.3, y: -1.4, z: 0.5, rot: {x: 62, y: -95, z: 5}, to: 7, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: 90, z: 0 } 
                 },
                 4: { 
                     pano: '#ho', 
                     hotspots: [
-                        { x: -2.1, y: 1.5, z: 0.4, rot: {x: 70, y: -90, z: 17}, to: 3, type: 'up-arrow', src: '#up-arrow'},                        
-                        { x: -1.8, y: 0.7, z: 1.2, rot: {x: -6.7, y: 110, z: 75}, to: 5, type: 'up-arrow', src: '#up-arrow'},
-                        { x: -1.5, y: 0.8, z: -1.8, rot: {x: -14, y: 20, z: -75}, to: 6, type: 'up-arrow', src: '#up-arrow'}
-                    ] 
+                        { x: -2.1, y: 1.5, z: 0.4, rot: {x: 70, y: -90, z: 17}, to: 3, type: 'upload', src: '#upload'},                        
+                        { x: -1.8, y: 0.7, z: 1.2, rot: {x: -6.7, y: 110, z: 75}, to: 5, type: 'upload', src: '#upload'},
+                        { x: -1.5, y: 0.8, z: -1.8, rot: {x: -14, y: 20, z: -75}, to: 6, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: 90, z: 0 } 
                 },
                 5: {
                     pano: '#trai',
                     hotspots: [
-                        { x: -1.7, y: 1.2, z: -1, rot: {x: 70, y: -90, z: 17}, to: 3, type: 'up-arrow', src: '#up-arrow'}
-                    ]
+                        { x: -1.7, y: 1.2, z: -1, rot: {x: 70, y: -90, z: 17}, to: 3, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: 90, z: 0 }
                 },
                 6: {
                     pano: '#phai',
                     hotspots: [
-                        { x: -1.3, y: 1.5, z: 0.7, rot: {x: 68, y: -50, z: 8}, to: 3, type: 'up-arrow', src: '#up-arrow'}
-                    ]
+                        { x: -1.3, y: 1.5, z: 0.7, rot: {x: 68, y: -50, z: 8}, to: 3, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: 90, z: 0 }
                 },
                 7: {
                     pano: '#trong',
                     hotspots: [
-                        { x: -1.3, y: 1.5, z: 0.7, rot: {x: 68, y: -50, z: 8}, to: 3, type: 'up-arrow', src: '#up-arrow'}
-                    ]
+                        { x: -1.3, y: 1.5, z: 0.7, rot: {x: 68, y: -50, z: 8}, to: 3, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: -90, z: 0 }
                 }
             };
             let currentAudio = document.querySelector('#audio1');
@@ -227,9 +234,9 @@
                     el.setAttribute('position', `${h.x} ${h.y} ${h.z}`);
                     // allow per-hotspot sizing
                     if (h.width) el.setAttribute('width', String(h.width));
-                    else el.setAttribute('width', '0.3');
+                    else el.setAttribute('width', '0.5');
                     if (h.height) el.setAttribute('height', String(h.height));
-                    else el.setAttribute('height', '0.3');
+                    else el.setAttribute('height', '0.5');
 
                     // apply rotation if provided in SCENES (object, array or string)
                     if (h.rot) {
@@ -265,16 +272,7 @@
                     }
                     hs.appendChild(el);
                     // DEBUG: add a small temporary sphere so we can see hotspot world position
-                    try {
-                        const dbg = document.createElement('a-sphere');
-                        dbg.setAttribute('position', `${h.x} ${h.y} ${h.z}`);
-                        dbg.setAttribute('radius', '0.05');
-                        dbg.setAttribute('color', '#ff0000');
-                        dbg.setAttribute('visible', 'true');
-                        hs.appendChild(dbg);
-                        // remove debug marker after 7s
-                        setTimeout(() => { if (dbg.parentNode) dbg.parentNode.removeChild(dbg); }, 7000);
-                    } catch (e) { /* ignore */ }
+                    // debug marker removed
                 });
             }
 
@@ -321,6 +319,8 @@
                 document.querySelector('#sky').setAttribute('src', SCENES[scene].pano);
 
                 renderHotspots(scene);
+                // move camera/rig to the scene's configured start rotation (if any)
+                try { goToSceneStart(scene); } catch (e) { /* ignore */ }
                 currentAudio = document.querySelector(`#audio${scene}`);
                 attachAudioListeners(currentAudio);
                 currentAudio.currentTime = 0;
@@ -370,6 +370,35 @@
                 _hotspotNavIndex[key] = idx;
                 const target = targets[idx];
                 changeScene(target);
+            }
+
+            /* Helpers: per-scene start rotation handling */
+            function rotationToString(rot) {
+                if (!rot) return '0 0 0';
+                if (typeof rot === 'string') return rot;
+                if (Array.isArray(rot)) return `${rot[0]} ${rot[1]} ${rot[2]}`;
+                if (typeof rot === 'object') return `${rot.x||0} ${rot.y||0} ${rot.z||0}`;
+                return String(rot);
+            }
+
+            function getStartRotationForScene(sceneId) {
+                const s = SCENES[sceneId];
+                if (s && s.startRotation) return rotationToString(s.startRotation);
+                return rotationToString(initialRigRotation);
+            }
+
+            function goToSceneStart(sceneId) {
+                const rig = document.querySelector('#rig');
+                if (!rig) return;
+                const rotStr = getStartRotationForScene(sceneId);
+                rig.setAttribute('rotation', rotStr);
+                
+                // update yaw to match the new rig Y rotation so auto-rotate continues from this heading
+                const parts = String(rotStr).trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    const parsed = parseFloat(parts[1]);
+                    if (!Number.isNaN(parsed)) yaw = parsed;
+                }
             }
             /* Start audio on first user interaction (autoplay blocked otherwise) */
             function attemptAutoplay() {
@@ -470,32 +499,7 @@
 
             /* Mark start position when auto-rotate first runs */
             function markStartPosition() {
-                try {
-                    const sceneEl = document.querySelector('a-scene');
-                    if (!sceneEl) return;
-                    // don't add if already present
-                    if (document.querySelector('#startMarker')) return;
-                    // Use AFRAME.THREE if available, otherwise fallback to Math.PI conversion
-                    const degToRad = (typeof AFRAME !== 'undefined' && AFRAME.THREE && AFRAME.THREE.Math && AFRAME.THREE.Math.degToRad)
-                        ? AFRAME.THREE.Math.degToRad
-                        : (v => v * Math.PI / 180);
-                    const rad = degToRad(yaw || 0);
-                    const dist = 6; // distance in world units from rig
-                    const x = -Math.sin(rad) * dist;
-                    const z = -Math.cos(rad) * dist;
-                    const y = 1.6; // eye level
-                    const marker = document.createElement('a-ring');
-                    marker.setAttribute('id', 'startMarker');
-                    marker.setAttribute('position', `${x} ${y} ${z}`);
-                    marker.setAttribute('radius-inner', '0.06');
-                    marker.setAttribute('radius-outer', '0.12');
-                    marker.setAttribute('color', '#ffea00');
-                    marker.setAttribute('material', 'shader:flat; side:double');
-                    marker.setAttribute('look-at', '#camera');
-                    sceneEl.appendChild(marker);
-                } catch (e) {
-                    console.warn('Could not mark start position', e);
-                }
+                // start marker creation removed to avoid adding world-space markers
             }
 
             /* Asset load diagnostics for arrow image */
@@ -537,12 +541,10 @@
             if (btnPrev) btnPrev.addEventListener('click', (ev) => { ev.stopPropagation(); prevScene(); });
             if (btnHome) btnHome.addEventListener('click', (ev) => {
                 ev.stopPropagation();
-                // reset panorama rotation to the initial rotation captured on load
-                const rig = document.querySelector('#rig');
-                if (rig) {
-                    rig.setAttribute('rotation', `${initialRigRotation.x} ${initialRigRotation.y} ${initialRigRotation.z}`);
-                    yaw = initialRigRotation.y;
-                }
+                // disable auto-rotate so the rig stays at the start rotation
+                autoRotate = false;
+                // go to the configured start rotation for the current scene (falls back to initial load rotation)
+                goToSceneStart(scene);
                 lastInteract = Date.now();
                 updateToolbarState();
             });
@@ -589,22 +591,28 @@
             (function ensureRenderOnSceneReady() {
                 const sceneEl = document.querySelector('a-scene');
                 if (!sceneEl) {
-                    window.addEventListener('load', () => renderHotspots(scene));
+                    window.addEventListener('load', () => {
+                        renderHotspots(scene);
+                        try { goToSceneStart(scene); } catch (e) { }
+                    });
                     return;
                 }
                 if (sceneEl.hasLoaded) {
                     renderHotspots(scene);
+                    try { goToSceneStart(scene); } catch (e) { }
                     console.log('Scene already loaded — hotspots rendered');
                 } else {
                     sceneEl.addEventListener('loaded', () => {
                         renderHotspots(scene);
+                        try { goToSceneStart(scene); } catch (e) { }
                         console.log('a-scene loaded — hotspots rendered');
                     });
                 }
             })();
             // Extra safety: call renderHotspots now and shortly after to catch dynamic updates
             try { renderHotspots(scene); } catch (e) { /* ignore */ }
-            setTimeout(() => { try { renderHotspots(scene); } catch (e) {} }, 500);
+            try { goToSceneStart(scene); } catch (e) { /* ignore */ }
+            setTimeout(() => { try { renderHotspots(scene); } catch (e) {} try { goToSceneStart(scene); } catch (e) {} }, 500);
         </script>
     </body>
 </html>
