@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="utf-8">
+        <title>VR Demo – Panotour Style</title>
+        <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+            }
+            /* Hide A-Frame's built-in VR/fullscreen control (bottom-right) */
+            .a-enter-vr, .a-enter-vr-button, .a-enter-vr__button, .a-enter-vr__icon, .a-enter-vr-button-container {
+                display: none !important;
+            }
+            /* Toolbar styles */
+            #toolbar {
+                position: fixed;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 14px;
+                background: rgba(0,0,0,0.6);
+                color: #fff;
+                padding: 6px 10px;
+                border-radius: 8px;
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                z-index: 9999;
+                font-family: sans-serif;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            }
+            #toolbar button {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.12);
+                color: #fff;
+                padding: 6px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+            }
+            #toolbar button:hover { background: rgba(255,255,255,0.04); }
+            #toolbar .sep { width:1px; height:22px; background:rgba(255,255,255,0.08); margin:0 6px; }
+        </style>
+    </head>
+    <body>
+        <a-scene>
+            <a-assets>
+                <!-- <img id="pano1" src="img/pano1.jpg"> -->
+                <img id="tuong" src="img/tuong.JPG">
+                <img id="toan" src="img/toan.JPG">
+                <img id="ho" src="img/ho.JPG">
+                <img id="bien" src="img/bien.jpg">
+                <img id="cong" src="img/cong.jpg">
+                <img id="san" src="img/san.JPG">
+                <img id="cua" src="img/cua.jpg">
+                <img id="trong" src="img/trong.jpg">
+                <img id="trai" src="img/trai.jpg">
+                <img id="phai" src="img/phai.jpg">
+                <img id="cong" src="img/cong.jpg">
+                <audio id="audio1" src="audio/scene1.wav" preload="auto" playsinline></audio>
+                <audio id="audio2" src="audio/scene2.wav" preload="auto" playsinline></audio>
+                <audio id="audio3" src="audio/scene3.wav" preload="auto" playsinline></audio>
+                <audio id="audio4" src="audio/scene4.wav" preload="auto" playsinline></audio>
+                <audio id="audio5" src="audio/scene5.wav" preload="auto" playsinline></audio>
+                <audio id="audio6" src="audio/scene6.wav" preload="auto" playsinline></audio>
+                <audio id="audio7" src="audio/scene7.wav" preload="auto" playsinline></audio>
+                <img id="arrow" src="icons/arrow.png">
+                <img id="up-arrow" src="icons/up-arrow.png">
+                <img id="info" src="icons/info.png">
+            </a-assets>
+            <!-- Fade layer -->
+            <!-- Camera rig -->
+            <a-entity id="rig" rotation="0 -90 0" auto-rotate>
+                <a-camera id="camera" look-controls wasd-controls="enabled:false">
+                    <a-sphere id="fade" radius="1.5" color="#000" material="opacity:0; transparent:true; side: back"></a-sphere>
+                    <!-- <a-entity id="hotspotFallback" visible="false" position="0 0 -1.5">
+                        <a-triangle color="#fff" vertex-a="0 0.2 0" vertex-b="-0.12 -0.12 0" vertex-c="0.12 -0.12 0" scale="1 1 1"></a-triangle>
+                    </a-entity>
+                    <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity> -->
+                    <!-- Gaze cursor for VR/headset interaction (hidden) -->
+                    <a-entity cursor="fuse: false" geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02" material="color: white; shader: flat" position="0 0 -1" visible="false"></a-entity>
+                </a-camera>
+                <!-- Mouse cursor + raycaster for desktop interaction -->
+                <a-entity id="mouseRay" cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity>
+            </a-entity>
+            <!-- Panorama -->
+            <a-sky id="sky" src="#tuong"></a-sky>
+
+            <!-- Hotspot container (WORLD SPACE) -->
+            <a-entity id="hotspots">
+            </a-entity>
+            <!-- Hotspot is now attached to camera -->
+        </a-scene>
+
+        <!-- Bottom toolbar (desktop overlay) -->
+        <div id="toolbar" role="toolbar" aria-label="VR controls">
+            <button id="btnPrev" title="Previous">◀ Prev</button>
+            <button id="btnPlay" title="Play/Pause">Play</button>
+            <button id="btnEnableSound" title="Bật âm" style="display:none;">Bật âm</button>
+            <button id="btnNext" title="Next">Next ▶</button>
+            <button id="btnHome" title="Home">Home</button>
+            <div class="sep"></div>
+            <button id="btnAuto" title="Toggle auto-rotate">Auto</button>
+            <button id="btnFS" title="Fullscreen">⤢</button>
+        </div>
+        <!-- Info popup (DOM overlay) -->
+        <div id="infoPopup" style="display:none; position:fixed; left:50%; top:20%; transform:translateX(-50%); background:rgba(0,0,0,0.85); color:#fff; padding:12px 16px; border-radius:8px; z-index:10000; max-width:60%; font-family:sans-serif;">
+            <div id="infoPopupContent"></div>
+            <div style="text-align:right; margin-top:8px;"><button id="infoClose" style="background:#fff;color:#000;border-radius:6px;padding:6px 10px;border:none;cursor:pointer;">Đóng</button></div>
+        </div>
+        <script>
+            let autoRotate = true;
+            let yaw = -90;
+            const initialYaw = yaw;
+            // remember the rig's rotation at load so Home returns exactly to this state
+            const rigEl = document.querySelector('#rig');
+            const initialRigRotation = rigEl ? rigEl.getAttribute('rotation') : { x: 0, y: initialYaw, z: 0 };
+            let startMarked = false;
+            let lastInteract = Date.now();
+            let scene = 1;
+            let scenceCurrent = 'tuong';
+            // SCENES: define hotspots with optional fields: to, type ('arrow'|'info'), src (asset id or url), rot, scale, text
+            const SCENES = {
+                1: {
+                    pano: '#tuong',
+                    hotspots: [
+                        { x: 4, y: 1.2, z: 0.3, rot: {x: 75, y: 90, z: 0}, to: 2, type: 'up-arrow', src: '#up-arrow'},
+                        { x: 4, y: 0.9, z: 1.5, rot: {x: 75, y: 90, z: 5}, to: 4, type: 'up-arrow', src: '#up-arrow'}
+                    ]
+                },
+                2: {
+                    pano: '#cong',
+                    hotspots: [
+                        { x: -4, y: 1, z: 0.8, rot: {x: 50, y: -90, z: -10}, to: 3, type: 'up-arrow', src: '#up-arrow'},
+                        { x: 1.8, y: 1.3, z: -6, rot: {x: -27, y: 29, z: 46}, to: 1, type: 'up-arrow', src: '#up-arrow'}
+                    ]
+                },
+                3: { 
+                    pano: '#toan',
+                    hotspots: [
+                        { x: -1.8, y: -0.1, z: -7, rot: {x: 60, y: -170, z: 5}, to: 4, type: 'up-arrow', src: '#up-arrow'},
+                        { x: 1.7, y: 1.2, z: -6, rot: {x: 60, y: -170, z: 5}, to: 1, type: 'up-arrow', src: '#up-arrow'},
+                        { x: -6.3, y: -1.4, z: 0.5, rot: {x: 62, y: -95, z: 5}, to: 7, type: 'up-arrow', src: '#up-arrow'}
+                    ] 
+                },
+                4: { 
+                    pano: '#ho', 
+                    hotspots: [
+                        { x: -2.1, y: 1.5, z: 0.4, rot: {x: 70, y: -90, z: 17}, to: 3, type: 'up-arrow', src: '#up-arrow'},                        
+                        { x: -1.8, y: 0.7, z: 1.2, rot: {x: -6.7, y: 110, z: 75}, to: 5, type: 'up-arrow', src: '#up-arrow'},
+                        { x: -1.5, y: 0.8, z: -1.8, rot: {x: -14, y: 20, z: -75}, to: 6, type: 'up-arrow', src: '#up-arrow'}
+                    ] 
+                },
+                5: {
+                    pano: '#trai',
+                    hotspots: [
+                        { x: -1.7, y: 1.2, z: -1, rot: {x: 70, y: -90, z: 17}, to: 3, type: 'up-arrow', src: '#up-arrow'}
+                    ]
+                },
+                6: {
+                    pano: '#phai',
+                    hotspots: [
+                        { x: -1.3, y: 1.5, z: 0.7, rot: {x: 68, y: -50, z: 8}, to: 3, type: 'up-arrow', src: '#up-arrow'}
+                    ]
+                },
+                7: {
+                    pano: '#trong',
+                    hotspots: [
+                        { x: -1.3, y: 1.5, z: 0.7, rot: {x: 68, y: -50, z: 8}, to: 3, type: 'up-arrow', src: '#up-arrow'}
+                    ]
+                }
+            };
+            let currentAudio = document.querySelector('#audio1');
+            let isPlaying = false;
+            /* Toolbar button elements (query early so updateToolbarState can use them) */
+            const btnPlay = document.querySelector('#btnPlay');
+            const btnNext = document.querySelector('#btnNext');
+            const btnPrev = document.querySelector('#btnPrev');
+            const btnAuto = document.querySelector('#btnAuto');
+            const btnFS = document.querySelector('#btnFS');
+            const btnEnableSound = document.querySelector('#btnEnableSound');
+            const btnHome = document.querySelector('#btnHome');
+            /* Auto rotate giống Panotour */
+            AFRAME.registerComponent('auto-rotate', {
+                tick: function(t, dt) {
+                    if (!autoRotate) return;
+                    yaw += dt * 0.002;
+                    this.el.setAttribute('rotation', `0 ${yaw} 0`);
+                    // mark the start position the first time auto-rotate runs
+                    if (!startMarked) {
+                        markStartPosition();
+                        startMarked = true;
+                    }
+                }
+            });
+            /* User interaction */
+            ['mousedown', 'touchstart', 'wheel'].forEach(e => {
+                document.addEventListener(e, (ev) => {
+                    // Ignore interactions that originate from the toolbar (so toolbar clicks don't disable auto-rotate)
+                    try {
+                        if (ev.target && ev.target.closest && ev.target.closest('#toolbar')) return;
+                    } catch (err) {}
+                    autoRotate = false;
+                    lastInteract = Date.now();
+                    updateToolbarState();
+                });
+            });
+            /* Auto rotate lại sau 5s */
+            setInterval(() => {
+                if (Date.now() - lastInteract > 5000) {
+                    if (!autoRotate) {
+                        autoRotate = true;
+                        updateToolbarState();
+                    }
+                }
+            }, 1000);
+
+            function renderHotspots(sceneId) {
+                const hs = document.getElementById('hotspots');
+                hs.innerHTML = '';
+
+                SCENES[sceneId].hotspots.forEach(h => {
+                    const el = document.createElement('a-image');
+                    const src = h.src || '#arrow';
+                    el.setAttribute('src', src);
+                    el.setAttribute('position', `${h.x} ${h.y} ${h.z}`);
+                    // allow per-hotspot sizing
+                    if (h.width) el.setAttribute('width', String(h.width));
+                    else el.setAttribute('width', '0.3');
+                    if (h.height) el.setAttribute('height', String(h.height));
+                    else el.setAttribute('height', '0.3');
+
+                    // apply rotation if provided in SCENES (object, array or string)
+                    if (h.rot) {
+                        if (typeof h.rot === 'string') {
+                            el.setAttribute('rotation', h.rot);
+                        } else if (Array.isArray(h.rot)) {
+                            el.setAttribute('rotation', `${h.rot[0]} ${h.rot[1]} ${h.rot[2]}`);
+                        } else if (typeof h.rot === 'object') {
+                            el.setAttribute('rotation', `${h.rot.x||0} ${h.rot.y||0} ${h.rot.z||0}`);
+                        }
+                    } else {
+                        // default: face camera horizontally
+                        el.setAttribute('face-horizontal', '');
+                    }
+
+                    // optional scale
+                    if (h.scale) {
+                        if (typeof h.scale === 'string') el.setAttribute('scale', h.scale);
+                        else if (Array.isArray(h.scale)) el.setAttribute('scale', `${h.scale[0]} ${h.scale[1]} ${h.scale[2]}`);
+                        else if (typeof h.scale === 'object') el.setAttribute('scale', `${h.scale.x||1} ${h.scale.y||1} ${h.scale.z||1}`);
+                    }
+
+                    el.setAttribute(
+                        'material',
+                        'shader: flat; transparent:true; alphaTest:0.5'
+                    );
+                    el.classList.add('clickable');
+                    // click behavior depends on type
+                    if (h.type === 'info') {
+                        el.addEventListener('click', () => showInfoPopup(h.text || h.title || 'Thông tin')); 
+                    } else if (typeof h.to !== 'undefined') {
+                        el.addEventListener('click', () => changeScene(h.to));
+                    }
+                    hs.appendChild(el);
+                    // DEBUG: add a small temporary sphere so we can see hotspot world position
+                    try {
+                        const dbg = document.createElement('a-sphere');
+                        dbg.setAttribute('position', `${h.x} ${h.y} ${h.z}`);
+                        dbg.setAttribute('radius', '0.05');
+                        dbg.setAttribute('color', '#ff0000');
+                        dbg.setAttribute('visible', 'true');
+                        hs.appendChild(dbg);
+                        // remove debug marker after 7s
+                        setTimeout(() => { if (dbg.parentNode) dbg.parentNode.removeChild(dbg); }, 7000);
+                    } catch (e) { /* ignore */ }
+                });
+            }
+
+            /* Fade helper - implement with requestAnimationFrame for robust control */
+            let _fadeRaf = null;
+            function fade(opacity, dur = 800) {
+                return new Promise(resolve => {
+                    const el = document.querySelector('#fade');
+                    if (!el) return resolve();
+                    // ensure fade plane is visible when animating
+                    el.setAttribute('visible', 'true');
+                    // read current opacity (default 0)
+                    const mat = el.getAttribute('material') || {};
+                    let from = parseFloat(mat.opacity || 0) || 0;
+                    const to = Number(opacity);
+                    if (Math.abs(from - to) < 0.001) return resolve();
+                    const start = performance.now();
+                    if (_fadeRaf) cancelAnimationFrame(_fadeRaf);
+                    function step(now) {
+                        const t = Math.min(1, (now - start) / dur);
+                        const cur = from + (to - from) * t;
+                        el.setAttribute('material', `opacity: ${cur}; transparent: true`);
+                        if (t < 1) {
+                            _fadeRaf = requestAnimationFrame(step);
+                        } else {
+                            _fadeRaf = null;
+                            // ensure final value
+                            el.setAttribute('material', `opacity: ${to}; transparent: true`);
+                            // hide plane if fully transparent to avoid obstructing view
+                            if (Math.abs(to) < 0.001) el.setAttribute('visible', 'false');
+                            resolve();
+                        }
+                    }
+                    _fadeRaf = requestAnimationFrame(step);
+                });
+            }
+            /* Change scene */
+            async function changeScene(id) {
+                autoRotate = false;
+                if (currentAudio) currentAudio.pause();
+                await fade(1, 600);
+                if (typeof id === 'number') scene = id;
+                // change sky source (assets preloaded in <a-assets>)
+                document.querySelector('#sky').setAttribute('src', SCENES[scene].pano);
+
+                renderHotspots(scene);
+                currentAudio = document.querySelector(`#audio${scene}`);
+                attachAudioListeners(currentAudio);
+                currentAudio.currentTime = 0;
+                if (isPlaying) {
+                    currentAudio.play().catch(() => { isPlaying = false; });
+                }
+                // small delay to ensure sky texture updates before fade-in
+                await new Promise(r => setTimeout(r, 60));
+                await fade(0, 600);
+                lastInteract = Date.now();
+                updateToolbarState();
+            }
+
+            // Navigation helpers: cycle through `to` targets declared in current scene's hotspots
+            const _hotspotNavIndex = {};
+            function _getTargetsForCurrentScene() {
+                const s = SCENES[scene];
+                if (!s || !Array.isArray(s.hotspots)) return [];
+                // collect defined 'to' targets in order, dedupe while preserving order
+                const seen = new Set();
+                const targets = [];
+                s.hotspots.forEach(h => {
+                    if (typeof h.to !== 'undefined' && !seen.has(h.to)) {
+                        seen.add(h.to);
+                        targets.push(h.to);
+                    }
+                });
+                return targets;
+            }
+            function nextScene() {
+                const targets = _getTargetsForCurrentScene();
+                if (!targets.length) return;
+                const key = String(scene);
+                const idx = (_hotspotNavIndex[key] || 0) % targets.length;
+                const target = targets[idx];
+                // advance index for next call
+                _hotspotNavIndex[key] = (idx + 1) % targets.length;
+                changeScene(target);
+            }
+            function prevScene() {
+                const targets = _getTargetsForCurrentScene();
+                if (!targets.length) return;
+                const key = String(scene);
+                const cur = typeof _hotspotNavIndex[key] === 'number' ? _hotspotNavIndex[key] : 0;
+                // step back one from current index (which points to next index used by nextScene)
+                const idx = (cur - 1 + targets.length) % targets.length;
+                _hotspotNavIndex[key] = idx;
+                const target = targets[idx];
+                changeScene(target);
+            }
+            /* Start audio on first user interaction (autoplay blocked otherwise) */
+            function attemptAutoplay() {
+                if (!currentAudio) return Promise.resolve(false);
+                // Try unmuted play first
+                return currentAudio.play().then(() => {
+                    isPlaying = true;
+                    updateToolbarState();
+                    showEnableButton(false);
+                    return true;
+                }).catch(() => {
+                    // Try muted autoplay (more likely to succeed)
+                    try {
+                        currentAudio.muted = true;
+                        return currentAudio.play().then(() => {
+                            isPlaying = true;
+                            updateToolbarState();
+                            // show button so user can unmute
+                            showEnableButton(true);
+                            return true;
+                        }).catch(() => {
+                            showEnableButton(true);
+                            return false;
+                        });
+                    } catch (e) {
+                        showEnableButton(true);
+                        return Promise.resolve(false);
+                    }
+                });
+            }
+
+            function initAudioOnce() {
+                attemptAutoplay();
+                document.removeEventListener('click', initAudioOnce);
+                document.removeEventListener('touchstart', initAudioOnce);
+            }
+            document.addEventListener('click', initAudioOnce);
+            document.addEventListener('touchstart', initAudioOnce);
+
+            /* Make hotspot clickable */
+            // const hotspot = document.querySelector('#hotspot');
+            // if (hotspot) hotspot.addEventListener('click', () => changeScene());
+
+            /* Audio listeners and helpers to reflect real play/pause state and schedule replay after end */
+            let previousAudio = null;
+            let replayTimeout = null;
+
+            function clearReplayTimeout() {
+                if (replayTimeout) {
+                    clearTimeout(replayTimeout);
+                    replayTimeout = null;
+                }
+            }
+
+            function attachAudioListeners(audioEl) {
+                if (!audioEl) return;
+                if (previousAudio && previousAudio !== audioEl) {
+                    previousAudio.removeEventListener('play', onAudioPlay);
+                    previousAudio.removeEventListener('pause', onAudioPause);
+                    previousAudio.removeEventListener('ended', onAudioEnded);
+                }
+                previousAudio = audioEl;
+                // ensure we don't keep a pending replay from previous audio
+                clearReplayTimeout();
+                audioEl.addEventListener('play', onAudioPlay);
+                audioEl.addEventListener('pause', onAudioPause);
+                audioEl.addEventListener('ended', onAudioEnded);
+                // set initial isPlaying state based on paused property
+                isPlaying = !audioEl.paused && !audioEl.ended;
+                updateToolbarState();
+            }
+
+            function onAudioPlay() { isPlaying = true; clearReplayTimeout(); updateToolbarState(); }
+            function onAudioPause() { isPlaying = false; updateToolbarState(); }
+
+            function onAudioEnded(event) {
+                isPlaying = false;
+                updateToolbarState();
+                // schedule replay after 60s (60000 ms)
+                const endedAudio = event && event.target ? event.target : previousAudio;
+                clearReplayTimeout();
+                replayTimeout = setTimeout(() => {
+                    // only replay if this audio is still the current one
+                    if (currentAudio === endedAudio) {
+                        endedAudio.play().then(() => {
+                            isPlaying = true;
+                            updateToolbarState();
+                        }).catch(err => {
+                            console.warn('Replay after timeout failed', err);
+                        });
+                    }
+                    replayTimeout = null;
+                }, 60000);
+            }
+
+            // attach to initial audio element
+            attachAudioListeners(currentAudio);
+
+            /* Mark start position when auto-rotate first runs */
+            function markStartPosition() {
+                try {
+                    const sceneEl = document.querySelector('a-scene');
+                    if (!sceneEl) return;
+                    // don't add if already present
+                    if (document.querySelector('#startMarker')) return;
+                    // Use AFRAME.THREE if available, otherwise fallback to Math.PI conversion
+                    const degToRad = (typeof AFRAME !== 'undefined' && AFRAME.THREE && AFRAME.THREE.Math && AFRAME.THREE.Math.degToRad)
+                        ? AFRAME.THREE.Math.degToRad
+                        : (v => v * Math.PI / 180);
+                    const rad = degToRad(yaw || 0);
+                    const dist = 6; // distance in world units from rig
+                    const x = -Math.sin(rad) * dist;
+                    const z = -Math.cos(rad) * dist;
+                    const y = 1.6; // eye level
+                    const marker = document.createElement('a-ring');
+                    marker.setAttribute('id', 'startMarker');
+                    marker.setAttribute('position', `${x} ${y} ${z}`);
+                    marker.setAttribute('radius-inner', '0.06');
+                    marker.setAttribute('radius-outer', '0.12');
+                    marker.setAttribute('color', '#ffea00');
+                    marker.setAttribute('material', 'shader:flat; side:double');
+                    marker.setAttribute('look-at', '#camera');
+                    sceneEl.appendChild(marker);
+                } catch (e) {
+                    console.warn('Could not mark start position', e);
+                }
+            }
+
+            /* Asset load diagnostics for arrow image */
+            const arrowAsset = document.querySelector('#arrow');
+            const fallback = document.querySelector('#hotspotFallback');
+            if (arrowAsset) {
+                arrowAsset.addEventListener('load', () => {
+                    console.log('arrow asset loaded');
+                    if (fallback) fallback.setAttribute('visible', 'false');
+                });
+                arrowAsset.addEventListener('error', (e) => {
+                    console.error('arrow asset failed to load', e);
+                    if (fallback) fallback.setAttribute('visible', 'true');
+                });
+                // in some browsers load event may already have fired
+                if (arrowAsset.complete && arrowAsset.naturalWidth !== 0) {
+                    console.log('arrow asset already loaded (complete)');
+                }
+            }
+
+            /* Toolbar controls (declared earlier) */
+
+            function updateToolbarState() {
+                if (btnPlay) btnPlay.textContent = isPlaying ? 'Pause' : 'Play';
+                if (btnAuto) btnAuto.textContent = autoRotate ? 'Auto: On' : 'Auto: Off';
+            }
+
+            if (btnPlay) btnPlay.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                if (!currentAudio) return;
+                if (isPlaying) {
+                    currentAudio.pause(); isPlaying = false;
+                } else {
+                    currentAudio.play().then(() => { isPlaying = true; }).catch(() => { isPlaying = false; });
+                }
+                updateToolbarState();
+            });
+            if (btnNext) btnNext.addEventListener('click', (ev) => { ev.stopPropagation(); nextScene(); });
+            if (btnPrev) btnPrev.addEventListener('click', (ev) => { ev.stopPropagation(); prevScene(); });
+            if (btnHome) btnHome.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                // reset panorama rotation to the initial rotation captured on load
+                const rig = document.querySelector('#rig');
+                if (rig) {
+                    rig.setAttribute('rotation', `${initialRigRotation.x} ${initialRigRotation.y} ${initialRigRotation.z}`);
+                    yaw = initialRigRotation.y;
+                }
+                lastInteract = Date.now();
+                updateToolbarState();
+            });
+            if (btnAuto) btnAuto.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                autoRotate = !autoRotate;
+                // if turning auto-rotate on and we haven't marked start yet, mark it now
+                if (autoRotate && !startMarked) {
+                    markStartPosition();
+                    startMarked = true;
+                }
+                lastInteract = Date.now();
+                updateToolbarState();
+            });
+            if (btnFS) btnFS.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                const el = document.documentElement;
+                if (!document.fullscreenElement) el.requestFullscreen?.();
+                else document.exitFullscreen?.();
+            });
+
+            function showEnableButton(show) {
+                if (!btnEnableSound) return;
+                btnEnableSound.style.display = show ? 'inline-block' : 'none';
+            }
+            if (btnEnableSound) {
+                btnEnableSound.addEventListener('click', () => {
+                    // Unmute all audio elements and play the current one
+                    document.querySelectorAll('audio').forEach(a => { a.muted = false; });
+                    if (currentAudio) {
+                        currentAudio.play().then(() => {
+                            isPlaying = true;
+                            updateToolbarState();
+                            showEnableButton(false);
+                        }).catch(err => {
+                            console.warn('Could not play after unmute', err);
+                        });
+                    }
+                });
+            }
+
+            updateToolbarState();
+            // Ensure hotspots are rendered after A-Frame scene has fully loaded/upgraded
+            (function ensureRenderOnSceneReady() {
+                const sceneEl = document.querySelector('a-scene');
+                if (!sceneEl) {
+                    window.addEventListener('load', () => renderHotspots(scene));
+                    return;
+                }
+                if (sceneEl.hasLoaded) {
+                    renderHotspots(scene);
+                    console.log('Scene already loaded — hotspots rendered');
+                } else {
+                    sceneEl.addEventListener('loaded', () => {
+                        renderHotspots(scene);
+                        console.log('a-scene loaded — hotspots rendered');
+                    });
+                }
+            })();
+            // Extra safety: call renderHotspots now and shortly after to catch dynamic updates
+            try { renderHotspots(scene); } catch (e) { /* ignore */ }
+            setTimeout(() => { try { renderHotspots(scene); } catch (e) {} }, 500);
+        </script>
+    </body>
+</html>
