@@ -51,13 +51,15 @@
                 <img id="toan" src="img/toan.JPG">
                 <img id="ho" src="img/ho.JPG">
                 <img id="bien" src="img/bien.jpg">
-                <img id="cong" src="img/cong.jpg">
+                <img id="cong" src="img/cong.JPG">
                 <img id="san" src="img/san.jpg">
                 <img id="cua" src="img/cua.jpg">
-                <img id="trong" src="img/trong.jpg">
+                <img id="trong" src="img/trong2.jpg">
                 <img id="trai" src="img/trai.JPG">
                 <img id="phai" src="img/phai.JPG">
                 <img id="cong" src="img/cong.jpg">
+                <img id="bang" src="img/bang.JPG">
+                <img id="khu" src="img/khu.JPG">
                 <audio id="audio1" src="audio/scene1.wav" preload="auto" playsinline></audio>
                 <audio id="audio2" src="audio/scene2.wav" preload="auto" playsinline></audio>
                 <audio id="audio3" src="audio/scene3.wav" preload="auto" playsinline></audio>
@@ -65,6 +67,7 @@
                 <audio id="audio5" src="audio/scene5.wav" preload="auto" playsinline></audio>
                 <audio id="audio6" src="audio/scene6.wav" preload="auto" playsinline></audio>
                 <audio id="audio7" src="audio/scene7.wav" preload="auto" playsinline></audio>
+                <audio id="audio8" src="audio/scene8.wav" preload="auto" playsinline></audio>
                 <img id="arrow" src="icons/arrow.png">
                 <img id="upload" src="icons/upload.png">
                 <img id="info" src="icons/info.png">
@@ -133,8 +136,8 @@
                 2: {
                     pano: '#cong',
                     hotspots: [
-                        { x: -4, y: 1, z: 0.8, rot: {x: 50, y: -90, z: -10}, to: 3, type: 'upload', src: '#upload'},
-                        { x: 3.4, y: 0.8, z: -6, rot: {x: -7.5, y: 26, z: 49}, to: 1, type: 'upload', src: '#upload'}
+                        { x: -5.2, y: 0.4, z: 1, rot: {x: 50, y: -90, z: -10}, to: 3, type: 'upload', src: '#upload'},
+                        { x: 0.6, y: 0.3, z: -6.5, rot: {x: -7.5, y: 26, z: 49}, to: 1, type: 'upload', src: '#upload'}
                     ],
                     startRotation: { x: 0, y: 90, z: 0 }
                 },
@@ -143,16 +146,17 @@
                     hotspots: [
                         { x: -1.8, y: -0.1, z: -7, rot: {x: 60, y: -170, z: 5}, to: 4, type: 'upload', src: '#upload'},
                         { x: 1.7, y: 1.2, z: -6, rot: {x: 60, y: -170, z: 5}, to: 1, type: 'upload', src: '#upload'},
-                        { x: -6.3, y: -1.4, z: 0.5, rot: {x: 62, y: -95, z: 5}, to: 7, type: 'upload', src: '#upload'}
+                        { x: -6.3, y: -1.4, z: 0.5, rot: {x: 62, y: -95, z: 5}, to: 7, type: 'upload', src: '#upload'},
+                        { x: 2, y: -0.2, z: 6.7, rot: {x: 7.3, y: 174, z: 2}, to: 8, type: 'upload', src: '#upload'}
                     ],
                     startRotation: { x: 0, y: 90, z: 0 } 
                 },
                 4: { 
-                    pano: '#ho', 
+                    pano: '#bang', 
                     hotspots: [
-                        { x: -2.1, y: 1.5, z: 0.4, rot: {x: 70, y: -90, z: 17}, to: 3, type: 'upload', src: '#upload'},                        
-                        { x: -1.8, y: 0.7, z: 1.2, rot: {x: -6.7, y: 110, z: 75}, to: 5, type: 'upload', src: '#upload'},
-                        { x: -1.5, y: 0.8, z: -1.8, rot: {x: -14, y: 20, z: -75}, to: 6, type: 'upload', src: '#upload'}
+                        { x: 4.3, y: 1.2, z: -0.3, rot: {x: -30, y: -90, z: 17}, to: 3, type: 'upload', src: '#upload'},                        
+                        { x: -2.1, y: 0.67, z: 1.3, rot: {x: 9.5, y: 110, z: 67}, to: 6, type: 'upload', src: '#upload'},
+                        { x: -1.4, y: 0.7, z: -1.6, rot: {x: 1.1, y: 84, z: -49.5}, to: 5, type: 'upload', src: '#upload'}
                     ],
                     startRotation: { x: 0, y: 90, z: 0 } 
                 },
@@ -176,6 +180,13 @@
                         { x: -1.3, y: 1.5, z: 0.7, rot: {x: 68, y: -50, z: 8}, to: 3, type: 'upload', src: '#upload'}
                     ],
                     startRotation: { x: 0, y: -90, z: 0 }
+                },
+                8: {
+                    pano: '#khu',
+                    hotspots: [
+                        { x: 1.3, y: 0.5, z: -1.1, rot: {x: -27.5, y: -14.5, z: -76}, to: 3, type: 'upload', src: '#upload'}
+                    ],
+                    startRotation: { x: 0, y: 45, z: 0 }
                 }
             };
             let currentAudio = document.querySelector('#audio1');
