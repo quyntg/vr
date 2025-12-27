@@ -127,6 +127,8 @@
             const SCENES = {
                 1: {
                     pano: '#tuong',
+                    next: 2,
+                    prev: 3,
                     hotspots: [
                         { x: 4, y: 1.2, z: 0.3, rot: {x: 75, y: 90, z: 0}, to: 2, type: 'upload', src: '#upload'},
                         { x: 4, y: 0.9, z: 1.5, rot: {x: 75, y: 90, z: 5}, to: 4, type: 'upload', src: '#upload'}
@@ -135,6 +137,8 @@
                 },
                 2: {
                     pano: '#cong',
+                    next: 3,
+                    prev: 1,
                     hotspots: [
                         { x: -5.2, y: 0.4, z: 1, rot: {x: 50, y: -90, z: -10}, to: 3, type: 'upload', src: '#upload'},
                         { x: 0.6, y: 0.3, z: -6.5, rot: {x: -7.5, y: 26, z: 49}, to: 1, type: 'upload', src: '#upload'}
@@ -362,21 +366,55 @@
                 return targets;
             }
             function nextScene() {
+                // If scene explicitly defines `next`, use that. Support number or array.
+                const sObj = SCENES[scene];
+                if (sObj && typeof sObj.next !== 'undefined') {
+                    const n = sObj.next;
+                    if (Array.isArray(n) && n.length) {
+                        const key = 'next_' + scene;
+                        const idx = (_hotspotNavIndex[key] || 0) % n.length;
+                        const target = n[idx];
+                        _hotspotNavIndex[key] = (idx + 1) % n.length;
+                        changeScene(target);
+                        return;
+                    } else {
+                        changeScene(n);
+                        return;
+                    }
+                }
+                // Fallback: cycle through declared hotspot `to` targets (existing behavior)
                 const targets = _getTargetsForCurrentScene();
                 if (!targets.length) return;
                 const key = String(scene);
                 const idx = (_hotspotNavIndex[key] || 0) % targets.length;
                 const target = targets[idx];
-                // advance index for next call
                 _hotspotNavIndex[key] = (idx + 1) % targets.length;
                 changeScene(target);
             }
             function prevScene() {
+                // If scene explicitly defines `prev`, use that. Support number or array.
+                const sObj = SCENES[scene];
+                if (sObj && typeof sObj.prev !== 'undefined') {
+                    const p = sObj.prev;
+                    if (Array.isArray(p) && p.length) {
+                        const key = 'next_' + scene; // share index with next-array for cycling
+                        const arr = p;
+                        const cur = typeof _hotspotNavIndex[key] === 'number' ? _hotspotNavIndex[key] : 0;
+                        const idx = (cur - 1 + arr.length) % arr.length;
+                        _hotspotNavIndex[key] = idx;
+                        const target = arr[idx];
+                        changeScene(target);
+                        return;
+                    } else {
+                        changeScene(p);
+                        return;
+                    }
+                }
+                // Fallback: cycle through declared hotspot `to` targets (existing behavior)
                 const targets = _getTargetsForCurrentScene();
                 if (!targets.length) return;
                 const key = String(scene);
                 const cur = typeof _hotspotNavIndex[key] === 'number' ? _hotspotNavIndex[key] : 0;
-                // step back one from current index (which points to next index used by nextScene)
                 const idx = (cur - 1 + targets.length) % targets.length;
                 _hotspotNavIndex[key] = idx;
                 const target = targets[idx];
